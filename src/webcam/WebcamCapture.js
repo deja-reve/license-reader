@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Webcam from "react-webcam";
 import { createWorker } from "tesseract.js";
-import { PDF417Reader, BarcodeFormat } from "@zxing/library";
+import { BrowserCodeReader, BrowserPDF417Reader } from "@zxing/browser";
 
 export const WebcamCapture = () => {
   const [imageSrc, setImageSrc] = useState(null);
@@ -17,26 +17,13 @@ export const WebcamCapture = () => {
     await worker.terminate();
   };
 
-  const decodeBarcode = async (image) => {
-    const codeReader = new PDF417Reader();
+  const decodeBarcode = async () => {
+    const source = "images/dl_back.jpeg";
+    const resultImage = await BrowserPDF417Reader.decodeBarcode(source);
 
-    const sourceImg = document.getElementById("dl-back");
-
-    const hints = new Map();
-    const formats = [BarcodeFormat.PDF_417];
-
-    hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
-
-    const reader = new MultiFormatReader();
-
-    const luminanceSource = new RGBLuminanceSource(
-      imgByteArray,
-      imgWidth,
-      imgHeight
+    const result = await BrowserPDF417Reader.decodeFromImageElement(
+      resultImage
     );
-    const binaryBitmap = new BinaryBitmap(new HybridBinarizer(luminanceSource));
-
-    const result = codeReader.decode(binaryBitmap, hints);
 
     setDecoded(result.text);
   };
@@ -59,7 +46,7 @@ export const WebcamCapture = () => {
 
       image.src = imageSrc;
 
-      decodeBarcode(image);
+      // decodeBarcode(image);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,7 +65,6 @@ export const WebcamCapture = () => {
       <p>{ocr}</p>
       <hr />
       <p>{decoded}</p>
-      <img alt="" id="dl-back" src="images/dl_back.jpeg" />
     </div>
   );
 };
